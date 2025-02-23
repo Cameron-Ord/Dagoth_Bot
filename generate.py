@@ -50,7 +50,9 @@ def wrap(pos: int, increm: int, len: int) -> int:
 def next_word(mat: dict[str, list[float]], temp: float) -> int:
     r: float = random.random()
     sum: float = 0.0
-    for i in range(weight_count):
+    start: int = random.randint(0, weight_count - 1)
+
+    for i in range(start, weight_count):
         sum += (mat['weight'][i] + temp)
         if r <= sum:
             return i
