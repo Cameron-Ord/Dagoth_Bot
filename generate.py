@@ -49,7 +49,8 @@ def next_word(mat: dict[str, list[float]]) -> int:
     offset: int = random.randint(0, weight_count-1)
 
     for i in range(0, weight_count):
-        sum += (mat['weight'][wrap(i, offset, weight_count)])
+        variance = random.uniform(-0.05, 0.05)
+        sum += (mat['weight'][wrap(i, offset, weight_count)] + variance)
         if r <= sum:
             return i
         else:
