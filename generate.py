@@ -6,7 +6,7 @@ MINGEN: int = 12
 MAXGEN: int = 24
 NOWWORD: str = "\n"
 
-weight_count: int = 64
+weight_count: int = 128
 
 
 def build_list(words: list[str]) -> list[dict[str, list[float]]]:
@@ -14,7 +14,7 @@ def build_list(words: list[str]) -> list[dict[str, list[float]]]:
     for i in range(len(words)):
         weights = []
         for j in range(weight_count):
-            weights.append(random.uniform(0.015, 0.075))
+            weights.append(random.uniform(0.0125, 0.0175))
 
         item = {'word': words[i].lower(), 'weight': weights}
         weighted.append(item)
@@ -50,10 +50,10 @@ def wrap(pos: int, increm: int, len: int) -> int:
 def next_word(mat: dict[str, list[float]], temp: float) -> int:
     r: float = random.random()
     sum: float = 0.0
-    start: int = random.randint(0, weight_count - 1)
+    offset: int = random.randint(0, weight_count-1)
 
-    for i in range(start, weight_count):
-        sum += (mat['weight'][i] + temp)
+    for i in range(0, weight_count):
+        sum += (mat['weight'][wrap(i, offset, weight_count)] + temp)
         if r <= sum:
             return i
         else:
@@ -67,13 +67,11 @@ def resp_gen(words: list[dict[str, list[float]]]) -> str:
     pos: int = random.randint(0, len(words) - 1)
 
     for i in range(nwords):
-        temp = random.uniform(random.uniform(-0.025, -0.01),
-                              random.uniform(0.01, 0.025))
+        temp = random.uniform(random.uniform(-0.00250, -0.00125),
+                              random.uniform(0.00125, 0.00250))
 
         word: str = words[pos]['word']
         pos = wrap(pos, next_word(words[pos], temp), len(words))
-
-        print(pos)
 
         next: bool = False
         for j in range(len(last_word)):
