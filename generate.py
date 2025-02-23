@@ -6,7 +6,15 @@ MINGEN: int = 4
 MAXGEN: int = 32
 NOWWORD: str = "\n"
 
-weight_count: int = 32
+weight_count: int = 6
+
+
+def reset_weights(words: list[dict[str, list[float]]]):
+    copy = words.copy()
+    for i in range(len(copy)):
+        for j in range(len(copy[i]['weight'])):
+            copy[i]['weight'][j] = random.uniform(0.25, 0.5)
+    return copy
 
 
 def build_list(words: list[str]) -> list[dict[str, list[float]]]:

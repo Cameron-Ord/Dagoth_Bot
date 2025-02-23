@@ -8,7 +8,42 @@ intents.message_content = True
 
 client = discord.Client(intents=intents)
 
-words = []
+
+class ListTracker:
+    def __init__(self):
+        self.words: list[dict[str, list[float]]] = []
+
+    def replace(self, mutation: list[dict[str, list[float]]]):
+        self.clear_words()
+        self.modify_words(mutation)
+
+    def get_words(self):
+        return self.words
+
+    def clear_words(self):
+        self.words.clear()
+
+    def modify_words(self, mutation: list[dict[str, list[float]]]):
+        print("updated")
+        self.words = mutation.copy()
+
+
+class EventTracker:
+    def __init__(self):
+        self.event_counter: int = 0
+
+    def get_count(self) -> int:
+        return self.event_counter
+
+    def increment(self):
+        self.event_counter += 1
+
+    def reset(self):
+        self.event_counter = 0
+
+
+event_tracker = EventTracker()
+ltrck = ListTracker()
 
 
 def find_key(msg: str) -> bool:
@@ -24,11 +59,9 @@ def find_key(msg: str) -> bool:
 
 @client.event
 async def on_ready():
-    words.clear()
     print(f'Logged in as {client.user}')
-    tmp = resp.build_list(resp.clean_text(resp.read_file("dagoth.txt")))
-    for i in range(len(tmp)):
-        words.append(tmp[i])
+    ltrck.replace(resp.build_list(
+        resp.clean_text(resp.read_file("dagoth.txt"))))
 
 
 @client.event
@@ -36,7 +69,12 @@ async def on_message(msg):
     if msg.author == client.user:
         return
 
+    if event_tracker.get_count() >= 4:
+        ltrck.replace(resp.reset_weights(ltrck.get_words()))
+        event_tracker.reset()
+
     if find_key(msg.content):
-        await msg.channel.send(f'{msg.author}, {resp.resp_gen(words)}')
+        await msg.channel.send(f'{msg.author}, {resp.resp_gen(ltrck.get_words())}')
+        event_tracker.increment()
 
 client.run(bot_token.TOKEN)
