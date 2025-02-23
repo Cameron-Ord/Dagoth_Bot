@@ -1,5 +1,4 @@
 import random
-import funny
 from funny import funny_word, funny_standin
 
 
@@ -7,6 +6,8 @@ NPREF: int = 2
 MINGEN: int = 12
 MAXGEN: int = 24
 NOWWORD: str = "\n"
+
+# https://github.com/Heatwave/the-practice-of-programming/blob/master/3.3.markov-chain.c
 
 
 def add(prefix: list[str], suffix: str):
