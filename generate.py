@@ -1,28 +1,25 @@
 import random
-from funny import funny_word, funny_standin
 
 
-NPREF: int = 2
-MINGEN: int = 12
-MAXGEN: int = 24
+NPREF: int = 8
+MINGEN: int = 4
+MAXGEN: int = 32
 NOWWORD: str = "\n"
 
-# https://github.com/Heatwave/the-practice-of-programming/blob/master/3.3.markov-chain.c
+weight_count: int = 32
 
 
-def add(prefix: list[str], suffix: str):
-    return {'word': suffix, 'pfx': [prefix[0], prefix[1]]}
-
-
-def build_list(prefix: list[str], words: list[str]) -> list[dict[str, list[str]]]:
-    arr = []
+def build_list(words: list[str]) -> list[dict[str, list[float]]]:
+    weighted = []
     for i in range(len(words)):
-        arr.append(add(prefix, words[i].lower()))
-        prefix[1:]
-        prefix.append(words[i].lower())
+        weights = []
+        for j in range(weight_count):
+            weights.append(random.uniform(0.25, 0.5))
 
-    arr.append(add(prefix, NOWWORD))
-    return arr
+        item = {'word': words[i].lower(), 'weight': weights}
+        weighted.append(item)
+
+    return weighted
 
 
 def clean_text(words: list[str]) -> list[str]:
@@ -30,9 +27,9 @@ def clean_text(words: list[str]) -> list[str]:
     unique = []
 
     for word in words:
-        if word not in seen:
+        if word.strip() not in seen:
             unique.append(word.strip())
-            seen.add(word)
+            seen.add(word.strip())
 
     return unique
 
@@ -42,44 +39,45 @@ def read_file(fp: str) -> list[str]:
         return file.read().split(',')
 
 
-def find(prefix: str, words: list[dict[str, list[str]]]) -> int:
-    i: int = 0
-    while (i < len(words)):
-        pfx = words[i]['pfx']
-        j: int = 0
-        while (j < NPREF):
-            if pfx[j] != prefix[j]:
-                break
-            j += 1
-        if j == NPREF:
+def wrap(pos: int, increm: int, len: int) -> int:
+    return (pos + increm) % len
+
+
+def next_word(mat: dict[str, list[float]]) -> int:
+    r: float = random.random()
+    sum: float = 0.0
+    offset: int = random.randint(0, weight_count-1)
+
+    for i in range(0, weight_count):
+        sum += (mat['weight'][wrap(i, offset, weight_count)])
+        if r <= sum:
             return i
-        i += 1
+        else:
+            continue
 
-    return i
 
+def resp_gen(words: list[dict[str, list[float]]]) -> str:
+    last_word: list[str] = []
+    response: str = ""
+    nwords: int = random.randint(MINGEN, MAXGEN)
+    pos: int = random.randint(0, len(words) - 1)
 
-def resp_gen(words: list[dict[str, list[str]]]) -> str:
-    prefix = [NOWWORD, NOWWORD]
-    response = ""
-    for i in range(random.randint(MINGEN, MAXGEN)):
-        word = ""
-        pos: int = find(prefix, words)
-        nmatch: int = 0
+    for i in range(nwords):
+        word: str = words[pos]['word']
+        pos = wrap(pos, next_word(words[pos]), len(words))
 
-        for j in range(pos, len(words)):
-            nmatch += 1
-            if random.randint(0, nmatch - 1) == 0:
-                word = words[j]['word']
+        next: bool = False
+        for j in range(len(last_word)):
+            if word == last_word[j]:
+                next = True
 
-        if word == NOWWORD:
-            break
-
-        prefix[1:]
-        prefix.append(word)
-
-        if word == funny_word:
-            word = funny_standin
+        if next:
+            continue
 
         response += word + " "
+        last_word.append(word)
+
+        if (len(last_word) > NPREF):
+            last_word.pop(0)
 
     return response

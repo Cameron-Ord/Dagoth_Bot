@@ -1,7 +1,6 @@
 import discord
 import bot_token
 import generate as resp
-from generate import NOWWORD
 
 intents = discord.Intents.default()
 intents.messages = True
@@ -9,8 +8,6 @@ intents.message_content = True
 
 client = discord.Client(intents=intents)
 
-
-prefix = [NOWWORD, NOWWORD]
 words = []
 
 
@@ -29,8 +26,7 @@ def find_key(msg: str) -> bool:
 async def on_ready():
     words.clear()
     print(f'Logged in as {client.user}')
-    tmp = resp.build_list(prefix, resp.clean_text(
-        resp.read_file("dagoth.txt")))
+    tmp = resp.build_list(resp.clean_text(resp.read_file("dagoth.txt")))
     for i in range(len(tmp)):
         words.append(tmp[i])
 
