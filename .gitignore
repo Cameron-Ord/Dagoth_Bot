@@ -1,0 +1,4 @@
+__pycache__/
+venv/
+dagoth.txt
+bot_token.py
