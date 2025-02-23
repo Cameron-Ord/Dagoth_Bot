@@ -51,6 +51,7 @@ def find(prefix: str, words: list[dict[str, list[str]]]) -> int:
             j += 1
         if j == NPREF:
             return i
+    return 0
 
 
 def resp_gen(words: list[dict[str, list[str]]]) -> str:
@@ -73,7 +74,7 @@ def resp_gen(words: list[dict[str, list[str]]]) -> str:
         prefix.append(word)
 
         if word == funny_word:
-            word == funny_standin
+            word = funny_standin
 
         response += word + " "
 
