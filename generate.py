@@ -43,7 +43,8 @@ def read_file(fp: str) -> list[str]:
 
 
 def find(prefix: str, words: list[dict[str, list[str]]]) -> int:
-    for i in range(len(words)):
+    i: int = 0
+    while (i < len(words)):
         pfx = words[i]['pfx']
         j: int = 0
         while (j < NPREF):
@@ -52,7 +53,9 @@ def find(prefix: str, words: list[dict[str, list[str]]]) -> int:
             j += 1
         if j == NPREF:
             return i
-    return 0
+        i += 1
+
+    return i
 
 
 def resp_gen(words: list[dict[str, list[str]]]) -> str:
