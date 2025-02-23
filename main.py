@@ -1,6 +1,7 @@
 import discord
 import bot_token
 import generate as resp
+import copy
 
 intents = discord.Intents.default()
 intents.messages = True
@@ -24,8 +25,7 @@ class ListTracker:
         self.words.clear()
 
     def modify_words(self, mutation: list[dict[str, list[float]]]):
-        print("updated")
-        self.words = mutation.copy()
+        self.words = copy.deepcopy(mutation)
 
 
 class EventTracker:
