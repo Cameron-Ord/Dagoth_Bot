@@ -1,80 +1,50 @@
 import discord
-import bot_token
-import generate as resp
-import copy
+from bot_token import TOKEN
 
-intents = discord.Intents.default()
-intents.messages = True
-intents.message_content = True
-
-client = discord.Client(intents=intents)
-
-
-class ListTracker:
-    def __init__(self):
-        self.words: list[dict[str, list[float]]] = []
-
-    def replace(self, mutation: list[dict[str, list[float]]]):
-        self.clear_words()
-        self.modify_words(mutation)
-
-    def get_words(self):
-        return self.words
-
-    def clear_words(self):
-        self.words.clear()
-
-    def modify_words(self, mutation: list[dict[str, list[float]]]):
-        self.words = copy.deepcopy(mutation)
-
-
-class EventTracker:
-    def __init__(self):
-        self.event_counter: int = 0
-
-    def get_count(self) -> int:
-        return self.event_counter
-
-    def increment(self):
-        self.event_counter += 1
-
-    def reset(self):
-        self.event_counter = 0
-
-
-event_tracker = EventTracker()
-ltrck = ListTracker()
+from markov import TimeHomog, TextParser
 
 
 def find_key(msg: str) -> bool:
-    key = "dagoth"
-    string_arr = msg.split(" ")
+    keys = ["dagoth", "n'wah", "nwah", "s'wit", "swit", "sixth", "house",
+            "nerevar", "farm", "tools", "argonians", "dunmer", "dark elf"]
 
-    for item in string_arr:
-        if item == key:
+    string_arr = msg.split(" ")
+    for i in range(len(string_arr)):
+        string_arr[i].lower()
+
+    for key in keys:
+        if key in string_arr:
             return True
 
     return False
 
 
-@client.event
-async def on_ready():
-    print(f'Logged in as {client.user}')
-    ltrck.replace(resp.build_list(
-        resp.clean_text(resp.read_file("dagoth.txt"))))
+class BotEntity:
+    def __init__(self, client, markov: TimeHomog):
+        self.client = client
+        self.markov = markov
+        self.client.event(self.on_ready)
+        self.client.event(self.on_message)
+
+    async def on_ready(self):
+        print(f'Logged in as {client.user}')
+
+    async def on_message(self, msg):
+        if msg.author == client.user:
+            return
+
+        if find_key(msg.content):
+            await msg.channel.send(f'{msg.author}, {self.markov.generate(None, 10)}')
 
 
-@client.event
-async def on_message(msg):
-    if msg.author == client.user:
-        return
+if __name__ == "__main__":
+    intents = discord.Intents.default()
+    intents.messages = True
+    intents.message_content = True
+    client = discord.Client(intents=intents)
 
-    if event_tracker.get_count() >= 4:
-        ltrck.replace(resp.reset_weights(ltrck.get_words()))
-        event_tracker.reset()
+    parser = TextParser()
+    markov = TimeHomog(parser.get_words())
 
-    if find_key(msg.content):
-        await msg.channel.send(f'{msg.author}, {resp.resp_gen(ltrck.get_words())}')
-        event_tracker.increment()
-
-client.run(bot_token.TOKEN)
+    bot = BotEntity(client, markov)
+    client.run(TOKEN)
