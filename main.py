@@ -1,7 +1,10 @@
 import discord
 from bot_token import TOKEN
+from random import randint
 
 from markov import TimeHomog, TextParser
+MINGEN = 12
+MAXGEN = 48
 
 
 def find_key(msg: str) -> bool:
@@ -34,7 +37,8 @@ class BotEntity:
             return
 
         if find_key(msg.content):
-            await msg.channel.send(f'{msg.author}, {self.markov.generate(None, 10)}')
+            await msg.channel.send(
+                f'{msg.author}, {self.markov.generate(None, randint(MINGEN, MAXGEN))}')
 
 
 if __name__ == "__main__":
