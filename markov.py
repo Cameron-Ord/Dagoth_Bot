@@ -48,23 +48,31 @@ class TimeHomog:
         return " ".join(sentence) + "."
 
     def build_matrix(self, words: list[str]):
+        # Initialize matrix
         matrix = {}
         for word in words:
             if word not in matrix:
+                # Add word with empty key:value {'word':{}, 'word':{}, ...}
                 matrix[word] = {}
 
         for i in range(len(words) - 1):
+            # Get the current and next word
             current_word = words[i]
             next_word = words[i+1]
 
+            # Assign the next word key:value to the current object
             if next_word in matrix[current_word]:
                 matrix[current_word][next_word] += 1
             else:
+                # This will place it initially with a 1 default value
+                # {'word':{'next_word': 1}, 'word':{'next_word': 1}, ...}
                 matrix[current_word][next_word] = 1
 
         for current_word in matrix:
+            # Sum values
             total = sum(matrix[current_word].values())
             for next_word in matrix[current_word]:
+                # Normalize values
                 matrix[current_word][next_word] /= total
 
         return matrix
